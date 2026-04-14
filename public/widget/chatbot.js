@@ -11,7 +11,7 @@
  *   <script src="..." async
  *     data-api-url="https://JOUW-NETLIFY-SITE.netlify.app/api"
  *     data-color="#e30613"
- *     data-bot-name="Sporti"></script>
+ *     data-bot-name="Ilse"></script>
  */
 (function () {
   'use strict';
@@ -23,8 +23,8 @@
   const scriptTag = document.currentScript || document.querySelector('script[src*="chatbot.js"]');
   const apiBase = (scriptTag?.dataset?.apiUrl || scriptTag?.src?.replace(/\/widget\/chatbot\.js.*$/, '/api')) || '/api';
   const primaryColor = scriptTag?.dataset?.color || '#e30613';
-  const botName = scriptTag?.dataset?.botName || 'Sporti';
-  const welcome = scriptTag?.dataset?.welcome || `Hoi! Ik ben ${botName}, de AI-assistent van Intersport Roden. Waar kan ik je mee helpen?`;
+  const botName = scriptTag?.dataset?.botName || 'Ilse';
+  const welcome = scriptTag?.dataset?.welcome || `Hoi! Ik ben ${botName} van sportenski. Waar kan ik je mee helpen?`;
 
   // Visitor ID (persistent per browser)
   function getVisitorId() {
@@ -120,7 +120,7 @@
       <div class="isc-header">
         <div>
           <div class="isc-header-title">${botName}</div>
-          <div class="isc-header-sub">Intersport Roden • Meestal binnen seconden antwoord</div>
+          <div class="isc-header-sub">sportenski • Meestal binnen seconden antwoord</div>
         </div>
         <button class="isc-close" aria-label="Sluiten">×</button>
       </div>
@@ -137,7 +137,7 @@
           <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
         </button>
       </div>
-      <div class="isc-footer">Powered by Claude AI</div>
+      <div class="isc-footer">Gerealiseerd door Sportenski</div>
     </div>
   `;
   document.body.appendChild(root);
