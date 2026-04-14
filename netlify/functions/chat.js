@@ -142,7 +142,7 @@ async function runTool(name, input, sessionId) {
 
 // ============ System prompt bouwen ============
 function buildSystemPrompt(faqs) {
-  const botName = process.env.BOT_NAME || 'Sander';
+  const botName = process.env.BOT_NAME || 'Ilse';
   const company = process.env.COMPANY_NAME || 'sportenski';
 
   const faqBlock = faqs.map((f, i) =>
