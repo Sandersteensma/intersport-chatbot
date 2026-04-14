@@ -4,52 +4,529 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Chatbot Admin — Intersport Roden</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
+    /* ================== DESIGN TOKENS ================== */
+    :root {
+      --red: #e30613;
+      --red-dark: #b80510;
+      --red-soft: #fff1f2;
+      --navy: #0d1b3d;
+      --navy-2: #1a2a52;
+      --ink: #0f172a;
+      --slate-900: #0f172a;
+      --slate-700: #334155;
+      --slate-500: #64748b;
+      --slate-400: #94a3b8;
+      --slate-300: #cbd5e1;
+      --slate-200: #e2e8f0;
+      --slate-100: #f1f5f9;
+      --slate-50: #f8fafc;
+      --bg: #f4f6fb;
+      --surface: #ffffff;
+      --green: #16a34a;
+      --green-soft: #ecfdf5;
+      --amber: #d97706;
+      --amber-soft: #fffbeb;
+      --rose: #e11d48;
+      --rose-soft: #fff1f2;
+      --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+      --shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+      --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.06), 0 2px 4px rgba(15, 23, 42, 0.04);
+      --shadow-lg: 0 10px 30px rgba(15, 23, 42, 0.08), 0 4px 10px rgba(15, 23, 42, 0.04);
+      --radius: 12px;
+      --radius-sm: 8px;
+      --radius-lg: 16px;
+      --tr: 180ms cubic-bezier(.4,0,.2,1);
+    }
+
     * { box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; background: #f5f6fa; color: #222; }
-    .topbar { background: #e30613; color: #fff; padding: 14px 24px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-    .topbar h1 { margin: 0; font-size: 18px; }
-    .topbar .logout { background: transparent; border: 1px solid #fff; color: #fff; padding: 6px 14px; border-radius: 4px; cursor: pointer; }
-    .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-    .tabs { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 2px solid #ddd; }
-    .tab { padding: 12px 20px; cursor: pointer; background: none; border: none; font-size: 14px; font-weight: 500; color: #666; border-bottom: 2px solid transparent; margin-bottom: -2px; }
-    .tab.active { color: #e30613; border-bottom-color: #e30613; }
-    .panel { display: none; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      font-size: 14px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      letter-spacing: -0.005em;
+    }
+    h1, h2, h3, h4 { letter-spacing: -0.02em; font-weight: 700; }
+    a { color: var(--red); text-decoration: none; }
+
+    /* ================== TOPBAR ================== */
+    .topbar {
+      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-2) 100%);
+      color: #fff;
+      padding: 0 28px;
+      height: 64px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 12px rgba(13, 27, 61, 0.18);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-mark {
+      width: 36px; height: 36px;
+      background: var(--red);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 16px;
+      box-shadow: 0 4px 12px rgba(227, 6, 19, 0.35);
+      letter-spacing: -0.02em;
+    }
+    .brand-text h1 { margin: 0; font-size: 15px; font-weight: 700; line-height: 1.1; }
+    .brand-text .sub { font-size: 11px; color: rgba(255,255,255,0.6); font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; }
+    .topbar-actions { display: flex; align-items: center; gap: 14px; }
+    .live-dot {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 12px; color: rgba(255,255,255,0.75);
+      padding: 6px 12px; background: rgba(255,255,255,0.06);
+      border-radius: 999px; border: 1px solid rgba(255,255,255,0.08);
+    }
+    .live-dot::before {
+      content: ''; width: 7px; height: 7px; border-radius: 50%;
+      background: #22c55e; box-shadow: 0 0 0 0 rgba(34,197,94,0.6);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%   { box-shadow: 0 0 0 0 rgba(34,197,94,0.6); }
+      70%  { box-shadow: 0 0 0 8px rgba(34,197,94,0); }
+      100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+    }
+    .logout {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.14);
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: var(--tr);
+      font-family: inherit;
+    }
+    .logout:hover { background: rgba(255,255,255,0.16); border-color: rgba(255,255,255,0.25); }
+
+    /* ================== LAYOUT ================== */
+    .container { max-width: 1280px; margin: 0 auto; padding: 28px 24px 60px; }
+    .page-header { margin-bottom: 22px; }
+    .page-header h2 { margin: 0 0 4px; font-size: 22px; color: var(--ink); }
+    .page-header p { margin: 0; color: var(--slate-500); font-size: 13px; }
+
+    /* ================== TABS ================== */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 24px;
+      background: var(--surface);
+      padding: 6px;
+      border-radius: 12px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--slate-200);
+      width: fit-content;
+      overflow-x: auto;
+    }
+    .tab {
+      padding: 9px 18px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--slate-500);
+      border-radius: 8px;
+      transition: var(--tr);
+      white-space: nowrap;
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .tab:hover { color: var(--ink); background: var(--slate-50); }
+    .tab.active {
+      color: #fff;
+      background: linear-gradient(135deg, var(--red) 0%, var(--red-dark) 100%);
+      box-shadow: 0 4px 12px rgba(227, 6, 19, 0.25);
+    }
+    .panel { display: none; animation: fadeIn 220ms ease; }
     .panel.active { display: block; }
-    .card { background: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 16px; }
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin-bottom: 20px; }
-    .stat-card { background: #fff; padding: 18px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-    .stat-label { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
-    .stat-value { font-size: 28px; font-weight: 700; color: #e30613; margin-top: 4px; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+    /* ================== CARDS ================== */
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--slate-200);
+      margin-bottom: 18px;
+    }
+    .card h3 {
+      margin: 0 0 16px;
+      font-size: 15px;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card h3 .accent {
+      width: 4px; height: 18px;
+      background: var(--red); border-radius: 2px;
+    }
+
+    /* ================== STAT CARDS ================== */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+    .stat-card {
+      background: var(--surface);
+      padding: 20px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--slate-200);
+      transition: var(--tr);
+      position: relative;
+      overflow: hidden;
+    }
+    .stat-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0;
+      height: 3px; background: var(--red); opacity: 0;
+      transition: var(--tr);
+    }
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--slate-300);
+    }
+    .stat-card:hover::before { opacity: 1; }
+    .stat-label {
+      font-size: 11px;
+      color: var(--slate-500);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      font-weight: 600;
+    }
+    .stat-value {
+      font-size: 30px;
+      font-weight: 800;
+      color: var(--ink);
+      margin-top: 6px;
+      line-height: 1.1;
+      letter-spacing: -0.025em;
+    }
+
+    /* ================== TABLES ================== */
     table { width: 100%; border-collapse: collapse; }
-    th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; }
-    th { background: #fafafa; font-weight: 600; color: #555; }
-    tr:hover { background: #fafafa; cursor: pointer; }
-    .btn { background: #e30613; color: #fff; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 13px; }
-    .btn:hover { background: #b50510; }
-    .btn-secondary { background: #fff; color: #333; border: 1px solid #ddd; }
-    .btn-danger { background: #d93025; }
-    input, textarea, select { width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 4px; font-family: inherit; font-size: 14px; }
-    textarea { resize: vertical; min-height: 80px; }
-    label { display: block; font-size: 13px; color: #555; margin: 10px 0 4px; }
-    .login-box { max-width: 340px; margin: 80px auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-    .login-box h2 { margin-top: 0; color: #e30613; }
-    .error { color: #d93025; font-size: 13px; margin-top: 8px; }
-    .msg { padding: 10px 14px; border-radius: 8px; margin-bottom: 8px; font-size: 14px; line-height: 1.5; white-space: pre-wrap; }
-    .msg-user { background: #e8f4fd; border-left: 3px solid #1a73e8; }
-    .msg-bot { background: #fff; border-left: 3px solid #e30613; border: 1px solid #eee; }
-    .msg-meta { font-size: 11px; color: #888; margin-bottom: 4px; }
-    .toolbar { display: flex; gap: 10px; margin-bottom: 14px; align-items: center; flex-wrap: wrap; }
-    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
+    th, td {
+      padding: 12px 14px;
+      text-align: left;
+      font-size: 13.5px;
+      vertical-align: middle;
+    }
+    thead th {
+      background: var(--slate-50);
+      font-weight: 600;
+      color: var(--slate-700);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      border-bottom: 1px solid var(--slate-200);
+    }
+    thead th:first-child { border-top-left-radius: 8px; }
+    thead th:last-child { border-top-right-radius: 8px; }
+    tbody td { border-bottom: 1px solid var(--slate-100); color: var(--slate-700); }
+    tbody tr { transition: background var(--tr); }
+    tbody tr:hover { background: var(--slate-50); cursor: pointer; }
+    tbody tr:last-child td { border-bottom: none; }
+
+    /* ================== BUTTONS ================== */
+    .btn {
+      background: linear-gradient(135deg, var(--red) 0%, var(--red-dark) 100%);
+      color: #fff;
+      border: none;
+      padding: 9px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: var(--tr);
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 2px 6px rgba(227, 6, 19, 0.2);
+    }
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 6px 14px rgba(227, 6, 19, 0.3); }
+    .btn:active { transform: translateY(0); }
+    .btn-secondary {
+      background: var(--surface);
+      color: var(--slate-700);
+      border: 1px solid var(--slate-300);
+      box-shadow: var(--shadow-sm);
+    }
+    .btn-secondary:hover {
+      background: var(--slate-50);
+      color: var(--ink);
+      border-color: var(--slate-400);
+      box-shadow: var(--shadow);
+    }
+    .btn-danger {
+      background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+      box-shadow: 0 2px 6px rgba(220, 38, 38, 0.2);
+    }
+
+    /* ================== FORMS ================== */
+    input, textarea, select {
+      width: 100%;
+      padding: 10px 13px;
+      border: 1px solid var(--slate-300);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 14px;
+      color: var(--ink);
+      background: var(--surface);
+      transition: var(--tr);
+    }
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--red);
+      box-shadow: 0 0 0 3px rgba(227, 6, 19, 0.12);
+    }
+    input::placeholder, textarea::placeholder { color: var(--slate-400); }
+    textarea { resize: vertical; min-height: 88px; line-height: 1.5; }
+    label {
+      display: block;
+      font-size: 12.5px;
+      color: var(--slate-700);
+      font-weight: 600;
+      margin: 14px 0 6px;
+    }
+
+    /* ================== LOGIN ================== */
+    #loginScreen {
+      min-height: 100vh;
+      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-2) 50%, #2a3d6e 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    #loginScreen::before {
+      content: '';
+      position: absolute;
+      top: -100px; right: -100px;
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(227, 6, 19, 0.15) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    #loginScreen::after {
+      content: '';
+      position: absolute;
+      bottom: -150px; left: -150px;
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(227, 6, 19, 0.08) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .login-box {
+      max-width: 380px;
+      width: 100%;
+      background: var(--surface);
+      padding: 36px 32px;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      position: relative;
+      z-index: 1;
+    }
+    .login-box .login-brand {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 22px;
+    }
+    .login-box .login-brand-mark {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, var(--red) 0%, var(--red-dark) 100%);
+      color: #fff;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 18px;
+      box-shadow: 0 6px 18px rgba(227, 6, 19, 0.35);
+    }
+    .login-box h2 {
+      margin: 0; color: var(--ink); font-size: 19px;
+    }
+    .login-box .sub {
+      margin: 2px 0 0; color: var(--slate-500); font-size: 12.5px;
+    }
+    .error {
+      color: var(--rose);
+      font-size: 12.5px;
+      margin-top: 10px;
+      padding: 8px 12px;
+      background: var(--rose-soft);
+      border-radius: 6px;
+      min-height: 0;
+      display: none;
+    }
+    .error:not(:empty) { display: block; }
+
+    /* ================== CHAT MESSAGES ================== */
+    .msg {
+      padding: 12px 16px;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      font-size: 14px;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      max-width: 85%;
+    }
+    .msg-user {
+      background: var(--slate-100);
+      border: 1px solid var(--slate-200);
+      margin-right: auto;
+    }
+    .msg-bot {
+      background: var(--red-soft);
+      border: 1px solid #fee2e2;
+      margin-left: auto;
+    }
+    .msg-meta {
+      font-size: 11px;
+      color: var(--slate-500);
+      margin-bottom: 4px;
+      font-weight: 500;
+    }
+
+    /* ================== TOOLBAR ================== */
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 18px;
+      align-items: center;
+      flex-wrap: wrap;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--slate-100);
+    }
+    .toolbar strong {
+      font-size: 15px;
+      color: var(--ink);
+      font-weight: 700;
+    }
+    .toolbar .hint {
+      color: var(--slate-500);
+      font-size: 12px;
+      margin-left: auto;
+    }
+
+    /* ================== MODAL ================== */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      animation: fadeIn 180ms ease;
+    }
     .modal.open { display: flex; }
-    .modal-content { background: #fff; border-radius: 8px; padding: 24px; max-width: 520px; width: 100%; max-height: 90vh; overflow-y: auto; }
-    .tag { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; background: #eee; color: #555; margin-right: 4px; }
-    .tag-active { background: #e0f3e8; color: #1a7f37; }
-    .tag-inactive { background: #fde7e6; color: #d93025; }
-    .feedback-pos { color: #1a7f37; }
-    .feedback-neg { color: #d93025; }
-    .bar { height: 6px; background: #eee; border-radius: 3px; overflow: hidden; margin-top: 4px; }
-    .bar-fill { height: 100%; background: #e30613; }
+    .modal-content {
+      background: var(--surface);
+      border-radius: 16px;
+      padding: 28px;
+      max-width: 560px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+      animation: slideUp 240ms cubic-bezier(.4,0,.2,1);
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(14px) scale(0.98); }
+      to   { opacity: 1; transform: none; }
+    }
+    .modal-content h3 {
+      font-size: 18px;
+      margin: 0 0 6px;
+      color: var(--ink);
+    }
+
+    /* ================== TAGS / BADGES ================== */
+    .tag {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      background: var(--slate-100);
+      color: var(--slate-700);
+      margin-right: 4px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      border: 1px solid var(--slate-200);
+    }
+    .tag-active {
+      background: var(--green-soft);
+      color: var(--green);
+      border-color: #bbf7d0;
+    }
+    .tag-inactive {
+      background: var(--rose-soft);
+      color: var(--rose);
+      border-color: #fecaca;
+    }
+    .feedback-pos { color: var(--green); font-weight: 600; }
+    .feedback-neg { color: var(--rose); font-weight: 600; }
+
+    /* ================== BARS ================== */
+    .bar {
+      height: 8px;
+      background: var(--slate-100);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 2px;
+    }
+    .bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--red) 0%, var(--red-dark) 100%);
+      border-radius: 999px;
+      transition: width 600ms cubic-bezier(.4,0,.2,1);
+    }
+
+    /* ================== SCROLLBAR ================== */
+    ::-webkit-scrollbar { width: 10px; height: 10px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--slate-300); border-radius: 5px; border: 2px solid var(--bg); }
+    ::-webkit-scrollbar-thumb:hover { background: var(--slate-400); }
+
+    /* ================== RESPONSIVE ================== */
+    @media (max-width: 720px) {
+      .topbar { padding: 0 16px; }
+      .container { padding: 18px 14px 40px; }
+      .brand-text .sub { display: none; }
+      .live-dot { display: none; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .stat-value { font-size: 24px; }
+      .modal-content { padding: 22px; }
+    }
+
+    /* small helpers */
+    .text-muted { color: var(--slate-500); font-size: 12px; }
+    .checkbox-row { display: flex; align-items: center; gap: 8px; margin-top: 14px; }
+    .checkbox-row input[type="checkbox"] { width: auto; accent-color: var(--red); transform: scale(1.1); }
+    .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--slate-100); }
   </style>
 </head>
 <body>
@@ -57,30 +534,49 @@
 <!-- LOGIN SCREEN -->
 <div id="loginScreen">
   <div class="login-box">
-    <h2>🤖 Chatbot Admin</h2>
-    <p style="color:#666;font-size:13px;">Intersport Roden</p>
+    <div class="login-brand">
+      <div class="login-brand-mark">IR</div>
+      <div>
+        <h2>Chatbot Admin</h2>
+        <div class="sub">Intersport Roden</div>
+      </div>
+    </div>
     <label>Gebruikersnaam</label>
-    <input type="text" id="loginUsername" autocomplete="username" />
+    <input type="text" id="loginUsername" autocomplete="username" placeholder="admin" />
     <label>Wachtwoord</label>
-    <input type="password" id="loginPassword" autocomplete="current-password" />
+    <input type="password" id="loginPassword" autocomplete="current-password" placeholder="••••••••" />
     <div class="error" id="loginError"></div>
-    <button class="btn" style="width:100%;margin-top:16px;" onclick="doLogin()">Inloggen</button>
+    <button class="btn" style="width:100%;margin-top:18px;justify-content:center;" onclick="doLogin()">Inloggen</button>
   </div>
 </div>
 
 <!-- MAIN APP -->
 <div id="appScreen" style="display:none;">
   <div class="topbar">
-    <h1>🤖 Chatbot Admin — Intersport Roden</h1>
-    <button class="logout" onclick="doLogout()">Uitloggen</button>
+    <div class="brand">
+      <div class="brand-mark">IR</div>
+      <div class="brand-text">
+        <h1>Chatbot Admin</h1>
+        <div class="sub">Intersport Roden</div>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <span class="live-dot">Live</span>
+      <button class="logout" onclick="doLogout()">Uitloggen</button>
+    </div>
   </div>
 
   <div class="container">
+    <div class="page-header">
+      <h2>Overzicht</h2>
+      <p>Beheer je chatbot, bekijk gesprekken en train antwoorden.</p>
+    </div>
+
     <div class="tabs">
       <button class="tab active" data-tab="dashboard">📊 Dashboard</button>
       <button class="tab" data-tab="conversations">💬 Gesprekken</button>
       <button class="tab" data-tab="unmatched">❓ Ongematchte vragen</button>
-      <button class="tab" data-tab="faq">📚 FAQ / Kennisbank</button>
+      <button class="tab" data-tab="faq">📚 Kennisbank</button>
     </div>
 
     <!-- DASHBOARD TAB -->
@@ -89,15 +585,15 @@
         <div class="stat-card"><div class="stat-label">Laden...</div></div>
       </div>
       <div class="card">
-        <h3 style="margin-top:0;">Top eerste vragen (laatste 30 dagen)</h3>
+        <h3><span class="accent"></span>Top eerste vragen <span class="text-muted" style="font-weight:400;margin-left:6px;">— laatste 30 dagen</span></h3>
         <table id="topQuestionsTable"><tbody><tr><td>Laden...</td></tr></tbody></table>
       </div>
       <div class="card">
-        <h3 style="margin-top:0;">Intent verdeling (welke antwoorden werden gegeven)</h3>
+        <h3><span class="accent"></span>Intent verdeling <span class="text-muted" style="font-weight:400;margin-left:6px;">— welke antwoorden werden gegeven</span></h3>
         <table id="intentsTable"><tbody><tr><td>Laden...</td></tr></tbody></table>
       </div>
       <div class="card">
-        <h3 style="margin-top:0;">Top FAQ's (meest gebruikt)</h3>
+        <h3><span class="accent"></span>Top FAQ's <span class="text-muted" style="font-weight:400;margin-left:6px;">— meest gebruikt</span></h3>
         <table id="topFaqsTable"><tbody><tr><td>Laden...</td></tr></tbody></table>
       </div>
     </div>
@@ -108,7 +604,7 @@
         <div class="toolbar">
           <strong>Vragen waar de bot geen antwoord op wist</strong>
           <button class="btn btn-secondary" onclick="loadUnmatched()">🔄 Vernieuwen</button>
-          <span style="color:#888;font-size:12px;">Klik "Beantwoorden" om een antwoord toe te voegen aan de kennisbank.</span>
+          <span class="hint">Klik "Beantwoorden" om een antwoord toe te voegen aan de kennisbank.</span>
         </div>
         <table id="unmatchedTable">
           <thead><tr><th>Vraag</th><th>Datum</th><th>Reden</th><th>Actie</th></tr></thead>
@@ -123,13 +619,14 @@
         <div class="toolbar">
           <strong>Recente gesprekken</strong>
           <button class="btn btn-secondary" onclick="loadConversations()">🔄 Vernieuwen</button>
+          <span class="hint">Klik op een rij voor het volledige gesprek.</span>
         </div>
         <table id="conversationsTable">
           <thead>
             <tr>
               <th>Gestart</th>
               <th>Eerste vraag</th>
-              <th># Berichten</th>
+              <th>Berichten</th>
               <th>Feedback</th>
               <th>Pagina</th>
             </tr>
@@ -145,7 +642,7 @@
         <div class="toolbar">
           <strong>FAQ / Kennisbank</strong>
           <button class="btn" onclick="openFaqModal()">+ Nieuwe FAQ toevoegen</button>
-          <span style="color:#888;font-size:12px;">Deze antwoorden worden meegegeven aan de chatbot.</span>
+          <span class="hint">Deze antwoorden worden meegegeven aan de chatbot.</span>
         </div>
         <table id="faqTable">
           <thead>
@@ -167,9 +664,10 @@
 <!-- GESPREK DETAIL MODAL -->
 <div class="modal" id="conversationModal">
   <div class="modal-content">
-    <h3 style="margin-top:0;">Gesprek bekijken</h3>
+    <h3>Gesprek bekijken</h3>
+    <p class="text-muted" style="margin:0 0 16px;">Volledige conversatie tussen klant en bot.</p>
     <div id="conversationDetail">Laden...</div>
-    <div style="text-align:right;margin-top:14px;">
+    <div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeModal('conversationModal')">Sluiten</button>
     </div>
   </div>
@@ -178,21 +676,25 @@
 <!-- FAQ MODAL -->
 <div class="modal" id="faqModal">
   <div class="modal-content">
-    <h3 style="margin-top:0;" id="faqModalTitle">Nieuwe FAQ toevoegen</h3>
+    <h3 id="faqModalTitle">Nieuwe FAQ toevoegen</h3>
+    <p class="text-muted" style="margin:0 0 8px;">Voeg een vraag en antwoord toe aan de kennisbank van je chatbot.</p>
     <input type="hidden" id="faqId" />
     <label>Vraag</label>
     <input type="text" id="faqQuestion" placeholder="bv. Wat zijn de verzendkosten?" />
     <label>Antwoord</label>
-    <textarea id="faqAnswer" placeholder="bv. Verzendkosten zijn €4,95. Boven €50 gratis."></textarea>
-    <label>Keywords (komma-gescheiden) — wanneer wordt deze FAQ gekozen?</label>
+    <textarea id="faqAnswer" placeholder="bv. Verzending binnen Nederland is altijd gratis."></textarea>
+    <label>Keywords <span class="text-muted" style="font-weight:400;">(komma-gescheiden)</span></label>
     <input type="text" id="faqKeywords" placeholder="bv. verzending, verzendkosten, bezorgen, verzendtijd" />
-    <small style="color:#888;font-size:11px;">💡 Tip: gebruik woorden en synoniemen die klanten typen. Laat leeg om automatisch te genereren uit de vraag.</small>
+    <small class="text-muted" style="display:block;margin-top:4px;">💡 Tip: gebruik woorden en synoniemen die klanten typen. Laat leeg om automatisch te genereren.</small>
     <label>Categorie</label>
     <input type="text" id="faqCategory" value="algemeen" />
-    <label>Prioriteit (hoger = belangrijker, 0-10)</label>
+    <label>Prioriteit <span class="text-muted" style="font-weight:400;">(0 = laag, 10 = hoog)</span></label>
     <input type="number" id="faqPriority" value="5" min="0" max="10" />
-    <label><input type="checkbox" id="faqActive" checked style="width:auto;margin-right:6px;"> Actief</label>
-    <div style="text-align:right;margin-top:20px;display:flex;gap:8px;justify-content:flex-end;">
+    <div class="checkbox-row">
+      <input type="checkbox" id="faqActive" checked>
+      <label for="faqActive" style="margin:0;">Actief — toon deze FAQ aan de bot</label>
+    </div>
+    <div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeModal('faqModal')">Annuleren</button>
       <button class="btn btn-danger" id="faqDeleteBtn" style="display:none;" onclick="deleteFaq()">Verwijderen</button>
       <button class="btn" onclick="saveFaq()">Opslaan</button>
@@ -203,18 +705,18 @@
 <!-- LEER VAN GESPREK MODAL -->
 <div class="modal" id="learnModal">
   <div class="modal-content">
-    <h3 style="margin-top:0;">Toevoegen aan FAQ / kennisbank</h3>
-    <p style="color:#666;font-size:13px;">Dit antwoord wordt direct toegevoegd aan de kennisbank, zodat de bot het bij toekomstige vragen gebruikt.</p>
-    <label>Vraag (pas eventueel aan)</label>
+    <h3>Toevoegen aan kennisbank</h3>
+    <p class="text-muted" style="margin:0 0 16px;">Dit antwoord wordt direct toegevoegd aan de kennisbank, zodat de bot het bij toekomstige vragen gebruikt.</p>
+    <label>Vraag <span class="text-muted" style="font-weight:400;">(pas eventueel aan)</span></label>
     <textarea id="learnQuestion" rows="2"></textarea>
-    <label>Antwoord (pas eventueel aan)</label>
+    <label>Antwoord <span class="text-muted" style="font-weight:400;">(pas eventueel aan)</span></label>
     <textarea id="learnAnswer" rows="5"></textarea>
-    <label>Keywords (komma-gescheiden) — laat leeg om automatisch te genereren</label>
+    <label>Keywords <span class="text-muted" style="font-weight:400;">(komma-gescheiden, leeg = automatisch)</span></label>
     <input type="text" id="learnKeywords" placeholder="bv. retour, ruilen, terugsturen" />
     <label>Categorie</label>
     <input type="text" id="learnCategory" value="geleerd" />
     <input type="hidden" id="learnSessionId" />
-    <div style="text-align:right;margin-top:20px;display:flex;gap:8px;justify-content:flex-end;">
+    <div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeModal('learnModal')">Annuleren</button>
       <button class="btn" onclick="saveLearned()">Toevoegen aan FAQ</button>
     </div>
