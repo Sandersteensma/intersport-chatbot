@@ -128,8 +128,8 @@
       <div class="isc-quick" id="isc-quick">
         <button class="isc-quick-btn" data-q="Waar blijft mijn bestelling?">📦 Waar blijft mijn bestelling?</button>
         <button class="isc-quick-btn" data-q="Hoe kan ik retourneren?">↩️ Retourneren</button>
-        <button class="isc-quick-btn" data-q="Wat zijn de openingstijden?">🕒 Openingstijden</button>
         <button class="isc-quick-btn" data-q="Ik zoek productadvies">👟 Productadvies</button>
+        <button class="isc-quick-btn" data-q="Wat zijn de contactgegevens?">📞 Contactgegevens</button>
       </div>
       <div class="isc-input-row">
         <input class="isc-input" id="isc-input" type="text" placeholder="Typ je vraag..." maxlength="500" />
