@@ -24,14 +24,14 @@ const TOOLS = [
   {
     name: 'get_order_status',
     description:
-      'Zoek een bestelling op in Magento op basis van het ordernummer (9 cijfers, begint meestal met 100). ' +
+      'Zoek een bestelling op in Magento op basis van het ordernummer (meestal 10 cijfers, bv. 4000089005). ' +
       'Gebruik dit ALLEEN wanneer de klant naar de status van een specifieke bestelling vraagt en een ordernummer heeft gegeven.',
     input_schema: {
       type: 'object',
       properties: {
         order_number: {
           type: 'string',
-          description: 'Het ordernummer dat de klant heeft gegeven, bv. 100001234',
+          description: 'Het ordernummer dat de klant heeft gegeven, bv. 4000089005',
         },
       },
       required: ['order_number'],
@@ -92,7 +92,6 @@ async function runTool(name, input, sessionId) {
         state: order.state,
         created_at: order.created_at,
         grand_total: `${Number(order.grand_total).toFixed(2)} ${order.currency || 'EUR'}`,
-        customer_firstname: order.customer_firstname,
         items: order.items.map(i => ({ name: i.name, qty: i.qty, price: Number(i.price).toFixed(2) })),
       };
     }
@@ -108,12 +107,7 @@ async function runTool(name, input, sessionId) {
         tracks: (tracking.tracks || []).map(t => ({
           carrier: t.carrier,
           track_number: t.track_number,
-          track_url:
-            t.carrier?.toLowerCase().includes('postnl')
-              ? `https://jouw.postnl.nl/track-en-trace/${t.track_number}`
-              : t.carrier?.toLowerCase().includes('dhl')
-                ? `https://www.dhlparcel.nl/nl/consument/volg-en-traceer?tt=${t.track_number}`
-                : null,
+          track_url: t.track_url || null,
         })),
       };
     }
@@ -142,46 +136,40 @@ async function runTool(name, input, sessionId) {
 
 // ============ System prompt bouwen ============
 function buildSystemPrompt(faqs) {
-  const botName = process.env.BOT_NAME || 'Ilse';
-  const company = process.env.COMPANY_NAME || 'sportenski';
+  const botName = process.env.BOT_NAME || 'Sporti';
+  const company = process.env.COMPANY_NAME || 'Intersport Roden';
 
   const faqBlock = faqs.map((f, i) =>
     `[FAQ ${i + 1}] Vraag: ${f.question}\nAntwoord: ${f.answer}${f.category ? `\nCategorie: ${f.category}` : ''}`
   ).join('\n\n');
 
-  return `Je bent ${botName}, de online klantenservice van Sport & Ski (winkels in Roden én Heerenveen, webshop op sportenski.nl).
+  return `Je bent ${botName}, de vriendelijke online assistent van ${company} — een sportwinkel in Roden, Drenthe.
+Je bent behulpzaam, warm en enthousiast over sport. Je praat Nederlands, op een natuurlijke, persoonlijke manier — alsof je een collega bent die even helpt. Houd antwoorden kort (max 4-5 regels), tenzij de klant meer wil weten.
 
-TOON & STIJL:
-- Schrijf alsof een echte medewerker zit te typen. Tutoyeren ("je" en "jij", niet "u").
-- Vriendelijk, informeel, warm — maar zonder overdrijven. Geen "super leuk!!" of "wauw".
-- Korte zinnen. Gewone spreektaal. Af en toe een "hoi", "top", "geen probleem" of "komt goed".
-- Max 4-5 regels per antwoord, tenzij er meer uitleg nodig is.
-- Emoji mag heel spaarzaam (max 1 per bericht, en alleen als het past). Liever geen emoji dan een geforceerde.
-- Geen opsommingslijsten met streepjes tenzij echt nodig — gewoon in zinnen antwoorden.
-- Geen markdown (de widget toont plain text).
+STIJL:
+- Wees warm en menselijk, niet robotachtig. Gebruik af en toe een emoji (maar niet overdrijven).
+- Spreek de klant aan met "je/jij". Wees behulpzaam en denk mee.
+- Als iets gelukt is (bestelling gevonden, product gevonden), reageer enthousiast.
+- Als iets niet lukt, wees eerlijk en bied altijd een alternatief (e-mail of winkel).
+- Gebruik GEEN markdown — de widget toont plain text. Gewone zinnen.
 
-WAT JE WEL/NIET DOET:
-1. Gebruik UITSLUITEND info uit:
-   (a) De FAQ-kennisbank hieronder.
-   (b) Resultaten van tools (get_order_status, get_tracking, search_products).
-   Verzin NOOIT orders, prijzen, voorraad, leverdata of producten.
-2. Focus ligt op online klanten: bestellingen, verzending, retour, producten in de webshop.
-3. Geef GEEN persoonlijk productadvies op eigen houtje (welk merk/maat/model). Je mag wél met de productzoeker concrete producten laten zien die de klant zelf kan bekijken.
-4. Voor orderstatus/tracking: vraag om een ordernummer als de klant dat nog niet heeft gegeven.
-5. Als een tool geen resultaat geeft: zeg dat eerlijk, en bied een alternatief (bv. contact opnemen of zelf checken op de site).
-6. RETOUR: Wil een klant iets retourneren? Verwijs vriendelijk door naar https://www.sportenski.nl/ruilen-retourneren/ — daar kan de klant met ordernummer + e-mailadres zelf een retour starten.
-7. RETOURKOSTEN: De verzendkosten voor een retour zijn voor rekening van de klant zelf. Kiest de klant in plaats van terugbetaling voor een coupon code, dan krijgt hij/zij een kortingscode voor sportenski.nl waarmee een nieuwe bestelling geplaatst kan worden. Noem dit alleen als het relevant is (bv. als de klant vraagt wat retour kost of wat de mogelijkheden zijn).
+WAT JE WEL MAG:
+- Informatie geven uit de FAQ-kennisbank hieronder.
+- Resultaten uit tools gebruiken (get_order_status, get_tracking, search_products).
+- Algemene begroetingen, bedanken, en sociale praatjes.
+- Bij tracking: geef ALTIJD de track_url mee als die beschikbaar is, zodat de klant direct kan klikken.
 
-FALLBACK BIJ WINKELVRAGEN:
-Wij hebben twee winkels. Als iemand naar openingstijden, adres, voorraad in de winkel of persoonlijk advies in de winkel vraagt:
-- Vraag welke winkel ze bedoelen: Roden of Heerenveen.
-- Verwijs daarna door met de juiste info uit de FAQ, óf naar de winkelpagina:
-  • Roden: https://www.sportenski.nl/winkels/roden
-  • Heerenveen: https://www.sportenski.nl/winkels/heerenveen
+WAT JE NIET MAG:
+- NOOIT producten, prijzen, voorraad, leverdata of tracking verzinnen. Alleen echte data uit tools.
+- GEEN eigen productadvies of meningen over merken/modellen. Bij persoonlijke adviesvragen (bv. "welke hardloopschoen past bij mij?"): verwijs vriendelijk naar de winkel of e-mail. Je mag wél de productzoeker gebruiken zodat de klant zelf kan kijken.
+- NOOIT klantnamen, e-mailadressen of andere persoonlijke gegevens aan de klant tonen (privacy).
 
-ALGEMENE FALLBACK:
-Weet je het antwoord niet uit FAQ of tools? Verwijs door naar:
-📧 info@sportenski.nl, of naar de winkelpagina's hierboven.
+ORDERNUMMERS:
+Klanten hebben een ordernummer van meestal 10 cijfers (bv. 4000089005). Als ze dat niet bij de hand hebben, vraag er vriendelijk naar. Het staat in hun bevestigingsmail.
+
+BIJ TWIJFEL:
+Weet je het antwoord niet zeker? Verwijs dan vriendelijk door:
+📧 info@intersportroden.nl — of kom gezellig langs in de winkel in Roden!
 
 KENNISBANK (FAQ's):
 ${faqBlock || '(nog geen FAQ\'s toegevoegd)'}
@@ -251,14 +239,14 @@ async function chatWithClaude(userMessage, sessionId) {
       matchedIntent = `ai:${toolCalls.join('+')}`;
     }
     return {
-      reply: reply || 'Hmm, ik kon geen goed antwoord genereren. Probeer het anders te vragen of neem contact op via info@sportenski.nl.',
+      reply: reply || 'Hmm, ik kon geen goed antwoord genereren. Probeer het anders te vragen of neem contact op via info@intersportroden.nl.',
       matchedIntent,
       matchedFaqId: null,
     };
   }
 
   return {
-    reply: 'Het lukt me even niet om dit goed te beantwoorden. Neem gerust contact op met onze klantenservice via info@sportenski.nl.',
+    reply: 'Het lukt me even niet om dit goed te beantwoorden. Neem gerust contact op met onze klantenservice via info@intersportroden.nl of kom langs in de winkel.',
     matchedIntent: 'ai:tool_loop',
     matchedFaqId: null,
   };
